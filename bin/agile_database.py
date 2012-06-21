@@ -1,8 +1,8 @@
 import argparse, signal, sys
 
-from mysql.baseline import baseline
-from mysql.patch import patch
-from mysql.rollback import rollback
+from impl.mysql.baseline import baseline
+from impl.mysql.patch import patch
+from impl.mysql.rollback import rollback
 
 def signal_handler(signal, frame):
     sys.exit(0)

@@ -3,15 +3,15 @@
 import MySQLdb, os, sys
 
 from warnings import filterwarnings, resetwarnings
-from mysql import security_credentials as security
-from bin import standard_dir_structure as dir_struct, connection_config as config, cksum
+from impl.mysql import security
+from impl.common import dir_struct, conn_config
 
 def clean_schema(connectConfig):
     try:
         conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
         cursor = conn.cursor()
         cursor.execute("DROP PROCEDURE IF EXISTS p_clean_tables;")
-        cursor.execute(open("./mysql/scripts/baseline/p_clean_tables.sql").read())
+        cursor.execute(open("./impl/mysql/scripts/baseline/p_clean_tables.sql").read())
         cursor.execute("""
             CALL p_clean_tables(%s);
             """, (connectConfig.getDatabase()))
@@ -27,7 +27,7 @@ def create_patch_metadata(connectConfig):
     try:
         conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
         cursor = conn.cursor()
-        cursor.execute(open("./mysql/scripts/baseline/patch_metadata.sql").read())
+        cursor.execute(open("./impl/mysql/scripts/baseline/patch_metadata.sql").read())
         cursor.close()
         conn.close()
     except MySQLdb.Error, e:
@@ -36,8 +36,8 @@ def create_patch_metadata(connectConfig):
     return
 
 
-def execute_baseline(scriptsBaseDir, connectConfig):
-    with open(os.path.join(scriptsBaseDir, 'baseline/install.sql'), 'r') as f:
+def execute_baseline(baseDir, connectConfig):
+    with open(os.path.join(baseDir, 'baseline/install.sql'), 'r') as f:
         for line in f:
             print line,
             try:
@@ -45,7 +45,7 @@ def execute_baseline(scriptsBaseDir, connectConfig):
                 # http://eric.lubow.org/2009/python/pythons-mysqldb-2014-error-commands-out-of-sync/
                 conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
                 cursor = conn.cursor()
-                cursor.execute(open(os.path.join(scriptsBaseDir, 'baseline/', line.rstrip('\n')), 'r').read())
+                cursor.execute(open(os.path.join(baseDir, 'baseline/', line.rstrip('\n')), 'r').read())
                 cursor.close()
                 conn.close()
             except MySQLdb.Error, e:
@@ -55,12 +55,9 @@ def execute_baseline(scriptsBaseDir, connectConfig):
     return
 
 
-def patch_metadata_assert_patches_applied(scriptsBaseDir, connectConfig):
-    patches = dir_struct.find_all_patch_scripts(scriptsBaseDir)
+def patch_metadata_assert_patches_applied(baseDir, connectConfig):
+    patches = dir_struct.all_patch_scripts(baseDir)
     for patch in patches:
-        if not os.path.isdir(patch):
-            patch_number = dir_struct.extract_patch_number(patch)
-            checksum = cksum.memcrc(open(patch, 'rb').read())
             try:
                 # new connection required inside loop, otherwise we can only have a single SQL statement per file, see:
                 # http://eric.lubow.org/2009/python/pythons-mysqldb-2014-error-commands-out-of-sync/
@@ -68,7 +65,7 @@ def patch_metadata_assert_patches_applied(scriptsBaseDir, connectConfig):
                 cursor = conn.cursor()
                 cursor.execute("""
                     INSERT INTO patch_metadata (release_number, patch_number, script, patch_type, patch_timestamp, script_checksum) VALUES (0, %s, %s, 'BASELINE', NOW(), %s);
-                    """, (patch_number, patch, int(checksum)))
+                    """, (patch.getPatchNumber(), patch.getName(), int(patch.getChecksum())))
                 cursor.execute("COMMIT;")
                 cursor.close()
                 conn.close()
@@ -78,15 +75,15 @@ def patch_metadata_assert_patches_applied(scriptsBaseDir, connectConfig):
     return
 
 
-def baseline(env, scriptsBaseDir):
+def baseline(env, baseDir):
     filterwarnings('ignore', category=MySQLdb.Warning)
 
-    connectConfig = config.retrieveConnectionConfigurationFor(env, scriptsBaseDir)
+    connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
     security.prompt_password_if_empty(connectConfig)
     clean_schema(connectConfig)
     create_patch_metadata(connectConfig)
-    execute_baseline(scriptsBaseDir, connectConfig)
-    patch_metadata_assert_patches_applied(scriptsBaseDir, connectConfig)
+    execute_baseline(baseDir, connectConfig)
+    patch_metadata_assert_patches_applied(baseDir, connectConfig)
 
     resetwarnings()
     return

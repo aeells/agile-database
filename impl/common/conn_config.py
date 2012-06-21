@@ -20,7 +20,7 @@ class ConnectConfig:
         return self.database
 
 
-def retrieveConnectionConfigurationFor(env, scriptsBaseDir):
-    connect_config = yaml.load(open(os.path.join(scriptsBaseDir, 'config/agile-database.yaml'), 'r'))[env]
+def retrieveConnectionConfigurationFor(env, baseDir):
+    connect_config = yaml.load(open(os.path.join(baseDir, 'config/agile-database.yaml'), 'r'))[env]
     return ConnectConfig(connect_config["host"], connect_config["user"], connect_config["password"], connect_config["database"])
 

@@ -12,15 +12,47 @@
 !.mavenrc
 # Ignore all files with the following extension.
 *.log
-*.iws
 *.orig
-*.iml
-*.ipr
-.idea
 *.ids
 *.pyc
 # Ignore the build directory
 target
-*.uat.sql
 
+*.py[co]
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+var
+sdist
+develop-eggs
+.installed.cfg
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+
+#Translations
+*.mo
+
+#Mr Developer
+.mr.developer.cfg
+
+# Intellij
+.idea
+*.iml
+*.iws
+*.ipr
+
+# Other additional ignores
+.coverage
+htmlcov
+deployments
 
