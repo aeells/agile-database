@@ -1,5 +1,3 @@
-# baseline.py -
-
 import MySQLdb, os, sys
 
 from warnings import filterwarnings, resetwarnings
