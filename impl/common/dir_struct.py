@@ -44,13 +44,13 @@ def reverseOrdering(lines):
     return reversed(lines)
 
 
-def all_scripts_from(baseDir, subDir, order):
+def all_scripts_from(baseDir, subDir, orderBy):
     patches = []
     for dirname, dirnames, filenames in os.walk(baseDir):
         for filename in filenames:
             if fnmatch.fnmatch(dirname, '**/patches/**'):
                 if fnmatch.fnmatch(filename, 'install.txt'):
-                    for line in order(open(os.path.join(dirname, filename), 'r').readlines()):
+                    for line in orderBy(open(os.path.join(dirname, filename), 'r').readlines()):
                         script = createScriptRepresentationFrom(dirname, subDir, line)
                         if script is not None:
                             patches.append(script)
