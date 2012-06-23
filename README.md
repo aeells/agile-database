@@ -5,9 +5,11 @@ Previous incarnation also needed to be embedded within the using project - contr
 
 Usage
 -----
-> python bin/agile_database baseline|patch|rollback <path_to_sql_scripts>
+```python
+python bin/agile_database baseline|patch|rollback <path_to_sql_scripts>
+```
 
 Requirements
 ------------
-Standard directory structure required at root of <path_to_sql_scripts>:
+Standard directory structure required at root of <i>\<path_to_sql_scripts\></i>:
 
