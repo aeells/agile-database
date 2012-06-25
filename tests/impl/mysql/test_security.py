@@ -18,7 +18,7 @@ class SecurityTest(unittest.TestCase):
 
         return
 
-    @unittest.skip("could not get this to work so that the first password is incorrect and the second correct.")
+#    @unittest.skip("could not get this to work so that the first password is incorrect and the second correct.")
     def test_secured_connection_password_incorrect(self):
         return
 
