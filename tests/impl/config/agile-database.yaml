@@ -1,0 +1,10 @@
+secured:
+  user: qmg_test
+  password:
+  host: localhost
+  database: test
+unsecured:
+  user: qmg_admin
+  password: qmg
+  host: localhost
+  database: qmg

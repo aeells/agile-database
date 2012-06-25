@@ -1,4 +1,4 @@
-import MySQLdb
+import MySQLdb, sys
 
 def prompt_password_if_empty(connectConfig):
     global password
