@@ -35,7 +35,7 @@ def create_patch_metadata(connectConfig):
 
 
 def execute_baseline(baseDir, connectConfig):
-    with open(os.path.join(baseDir, 'baseline/install.sql'), 'r') as f:
+    with open(os.path.join(baseDir, 'baseline/install.txt'), 'r') as f:
         for line in f:
             print line,
             try:
