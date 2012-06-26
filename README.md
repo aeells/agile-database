@@ -38,8 +38,9 @@ Standard directory structure required at root of <i>\<path_to_sql_scripts\></i>:
             - d.sql
 
 Assuming the above example, where none of the patches in vanity subdirectories (1, 2) have yet been applied, patches will be executed in order:<br/>
-- a, b, c, d.sql
-<br/>Rollbacks only occur on the most recent patch so as to avoid rolling back to the beginning of time. They occur in reverse vanity subdirectory order and then reverse order within the install.txt:<br/>
+- a, b, c, d.sql<br/>
+
+Rollbacks only occur on the most recent patch so as to avoid rolling back to the beginning of time. They occur in reverse vanity subdirectory order and then reverse order within the install.txt:<br/>
 - d, c, b, a.sql
   
 
