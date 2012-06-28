@@ -108,3 +108,24 @@ def determine_patch_applied_recently(connectConfig, script, releaseNumber):
         sys.exit(1)
     return release_number
 
+def determine_if_baseline_exists(connectConfig):
+    baseline_exists = False
+    try:
+        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT COUNT(*) FROM information_schema.tables
+                WHERE table_schema = %s
+                AND table_name = 'patch_metadata'
+            """, (connectConfig.getDatabase()))
+        row = cursor.fetchone()
+        if row is not None:
+            if row[0] > 0:
+                baseline_exists = True
+        cursor.close()
+        conn.close()
+    except MySQLdb.Error, e:
+        print "Error %d: %s" % (e.args[0], e.args[1])
+        sys.exit(1)
+    return baseline_exists
+

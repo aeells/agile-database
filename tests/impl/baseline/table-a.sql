@@ -1,0 +1,5 @@
+CREATE TABLE test_a (
+	id INT NOT NULL AUTO_INCREMENT,
+	name VARCHAR(30),
+	PRIMARY KEY(id)
+);

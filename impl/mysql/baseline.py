@@ -1,15 +1,19 @@
+import pymysql
+pymysql.install_as_MySQLdb()
 import MySQLdb, os, sys
+from pkg_resources import resource_string
 
 from warnings import filterwarnings, resetwarnings
-from impl.mysql import security
+from impl.mysql import security, common_dml
 from impl.common import dir_struct, conn_config
+
 
 def clean_schema(connectConfig):
     try:
         conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
         cursor = conn.cursor()
         cursor.execute("DROP PROCEDURE IF EXISTS p_clean_tables;")
-        cursor.execute(open("./impl/mysql/scripts/baseline/p_clean_tables.sql").read())
+        cursor.execute(resource_string(__name__, 'scripts/baseline/p_clean_tables.sql'))
         cursor.execute("""
             CALL p_clean_tables(%s);
             """, (connectConfig.getDatabase()))
@@ -25,7 +29,7 @@ def create_patch_metadata(connectConfig):
     try:
         conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
         cursor = conn.cursor()
-        cursor.execute(open("./impl/mysql/scripts/baseline/patch_metadata.sql").read())
+        cursor.execute(resource_string(__name__, 'scripts/baseline/patch_metadata.sql'))
         cursor.close()
         conn.close()
     except MySQLdb.Error, e:
@@ -73,11 +77,13 @@ def patch_metadata_assert_patches_applied(baseDir, connectConfig):
     return
 
 
-def baseline(env, baseDir):
+def baseline(env, baseDir, connectConfig = None):
     filterwarnings('ignore', category=MySQLdb.Warning)
 
-    connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
-    security.prompt_password_if_empty(connectConfig)
+    if connectConfig is None:
+        connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
+        security.prompt_password_if_empty(connectConfig)
+
     clean_schema(connectConfig)
     create_patch_metadata(connectConfig)
     execute_baseline(baseDir, connectConfig)
@@ -85,3 +91,10 @@ def baseline(env, baseDir):
 
     resetwarnings()
     return
+
+def check(env, baseDir, connectConfig = None):
+    if connectConfig is None:
+        connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
+        security.prompt_password_if_empty(connectConfig)
+
+    return common_dml.determine_if_baseline_exists(connectConfig)
