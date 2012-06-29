@@ -6,7 +6,7 @@ def prompt_password_if_empty(connectConfig):
     global password
     if connectConfig.getPassword() is None:
         invalid = True
-        while (invalid):
+        while invalid:
             password = raw_input("Please enter password to access database " + connectConfig.getDatabase() + " on " + connectConfig.getHost() + ": ")
             connectConfig.password = password
             invalid = check_invalid_credentials(connectConfig)

@@ -9,5 +9,5 @@ setup(name='agile-database',
           '':['*.sql']
       },
       test_suite='tests',
-      tests_require='mock',
+      tests_require=['mock'],
       )
