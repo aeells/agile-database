@@ -1,15 +1,17 @@
-import MySQLdb, os, sys
+import sys
+from pymysql.err import MySQLError
+from impl.mysql import get_connection
 
 def update_release_number(connectConfig):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE seq_patch_metadata SET value = value + 1;
             """)
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
     return select_release_number(connectConfig)
@@ -17,7 +19,7 @@ def update_release_number(connectConfig):
 
 def select_release_number(connectConfig):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT value FROM seq_patch_metadata;
@@ -25,7 +27,7 @@ def select_release_number(connectConfig):
         release_number = cursor.fetchone()[0]
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
     return release_number
@@ -33,7 +35,7 @@ def select_release_number(connectConfig):
 
 def insert_patch_metadata_entry(connectConfig, script, release_number):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
                     INSERT INTO patch_metadata (release_number, patch_number, script, patch_type, patch_timestamp, script_checksum) VALUES (%s, %s, %s, 'PATCH', NOW(), %s);
@@ -41,14 +43,14 @@ def insert_patch_metadata_entry(connectConfig, script, release_number):
         cursor.execute("COMMIT;")
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
 
 
 def update_patch_metadata_entry(connectConfig, script, release_number, patch_type):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
                     UPDATE patch_metadata SET release_number = %s, patch_type = %s, patch_timestamp = NOW(), script_checksum = %s
@@ -58,14 +60,14 @@ def update_patch_metadata_entry(connectConfig, script, release_number, patch_typ
         cursor.execute("COMMIT;")
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
 
 
 def determine_patch_type_if_already_applied(connectConfig, script):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT patch_type FROM patch_metadata
@@ -79,7 +81,7 @@ def determine_patch_type_if_already_applied(connectConfig, script):
             patch_type = None
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
     return patch_type
@@ -87,7 +89,7 @@ def determine_patch_type_if_already_applied(connectConfig, script):
 
 def determine_patch_applied_recently(connectConfig, script, releaseNumber):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT release_number FROM patch_metadata
@@ -103,7 +105,7 @@ def determine_patch_applied_recently(connectConfig, script, releaseNumber):
             release_number = None
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
     return release_number
@@ -111,7 +113,7 @@ def determine_patch_applied_recently(connectConfig, script, releaseNumber):
 def determine_if_baseline_exists(connectConfig):
     baseline_exists = False
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT COUNT(*) FROM information_schema.tables
@@ -124,7 +126,7 @@ def determine_if_baseline_exists(connectConfig):
                 baseline_exists = True
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
     return baseline_exists

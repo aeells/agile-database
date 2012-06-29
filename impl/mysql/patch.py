@@ -1,24 +1,22 @@
-import MySQLdb, os, sys
+import os, sys
+from pymysql.err import MySQLError
 
-from warnings import filterwarnings, resetwarnings
-from impl.mysql import security, common_dml
+from impl.mysql import security, common_dml, get_connection
 from impl.common import dir_struct, conn_config
 
 def apply_patch(connectConfig, script):
     try:
-        conn = MySQLdb.connect(connectConfig.getHost(), connectConfig.getUser(), connectConfig.getPassword(), connectConfig.getDatabase())
+        conn = get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute(open(os.path.join(script.getPath(), script.getName()), 'r').read())
         cursor.close()
         conn.close()
-    except MySQLdb.Error, e:
+    except MySQLError as e:
         print "Error %d: %s" % (e.args[0], e.args[1])
         sys.exit(1)
 
 
 def patch(env, baseDir):
-    filterwarnings('ignore', category=MySQLdb.Warning)
-
     connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
     security.prompt_password_if_empty(connectConfig)
 
@@ -38,7 +36,4 @@ def patch(env, baseDir):
             print "Applying patch: " + script.getName()
             apply_patch(connectConfig, script)
             common_dml.insert_patch_metadata_entry(connectConfig, script, release_number)
-
-    resetwarnings()
-    return
 
