@@ -1,20 +1,11 @@
-import os, sys
-from pymysql.err import MySQLError
+import os
 
-from warnings import filterwarnings, resetwarnings
-from impl.mysql import security, common_dml, get_connection
+from impl.mysql import security, common_dml, _get_connection, open_db
 from impl.common import dir_struct, conn_config
 
 def apply_rollback(connectConfig, script):
-    try:
-        conn = get_connection(connectConfig)
-        cursor = conn.cursor()
+    with open_db(connectConfig) as cursor:
         cursor.execute(open(os.path.join(script.getPath(), script.getName()), 'r').read())
-        cursor.close()
-        conn.close()
-    except MySQLError as e:
-        print "Error %d: %s" % (e.args[0], e.args[1])
-        sys.exit(1)
 
 
 def rollback(env, baseDir):

@@ -1,6 +1,6 @@
 import sys
-from pymysql.err import MySQLError, OperationalError
-from impl.mysql import get_connection
+from pymysql.err import OperationalError, MySQLError
+from impl.mysql import _get_connection
 
 def prompt_password_if_empty(connectConfig):
     global password
@@ -14,7 +14,7 @@ def prompt_password_if_empty(connectConfig):
 
 def check_invalid_credentials(connectConfig):
     try:
-        conn = get_connection(connectConfig)
+        conn = _get_connection(connectConfig)
         cursor = conn.cursor()
         cursor.execute("SELECT 1")
         cursor.close()

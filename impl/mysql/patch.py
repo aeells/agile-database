@@ -1,19 +1,10 @@
-import os, sys
-from pymysql.err import MySQLError
-
-from impl.mysql import security, common_dml, get_connection
+import os
+from impl.mysql import security, common_dml, open_db
 from impl.common import dir_struct, conn_config
 
 def apply_patch(connectConfig, script):
-    try:
-        conn = get_connection(connectConfig)
-        cursor = conn.cursor()
+    with open_db(connectConfig) as cursor:
         cursor.execute(open(os.path.join(script.getPath(), script.getName()), 'r').read())
-        cursor.close()
-        conn.close()
-    except MySQLError as e:
-        print "Error %d: %s" % (e.args[0], e.args[1])
-        sys.exit(1)
 
 
 def patch(env, baseDir):
