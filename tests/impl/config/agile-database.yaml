@@ -4,7 +4,7 @@ secured:
   host: localhost
   database: test
 unsecured:
-  user: qmg
+  user: qmg_admin
   password: qmg
   host: localhost
-  database: test
+  database: qmg
