@@ -8,9 +8,10 @@ def apply_rollback(connectConfig, script):
         cursor.execute(open(os.path.join(script.getPath(), script.getName()), 'r').read())
 
 
-def rollback(env, baseDir):
-    connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
-    security.prompt_password_if_empty(connectConfig)
+def rollback(env, baseDir, connectConfig = None):
+    if connectConfig is None:
+        connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
+        security.prompt_password_if_empty(connectConfig)
 
     current_release_number = common_dml.select_release_number(connectConfig)
 

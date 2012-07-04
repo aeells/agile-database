@@ -7,9 +7,10 @@ def apply_patch(connectConfig, script):
         cursor.execute(open(os.path.join(script.getPath(), script.getName()), 'r').read())
 
 
-def patch(env, baseDir):
-    connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
-    security.prompt_password_if_empty(connectConfig)
+def patch(env, baseDir, connectConfig = None):
+    if connectConfig is None:
+        connectConfig = conn_config.retrieveConnectionConfigurationFor(env, baseDir)
+        security.prompt_password_if_empty(connectConfig)
 
     release_number = common_dml.update_release_number(connectConfig)
 
