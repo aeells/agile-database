@@ -1,6 +1,6 @@
 import os
 
-from impl.mysql import security, common_dml, _get_connection, open_db
+from impl.mysql import security, common_dml, open_db
 from impl.common import dir_struct, conn_config
 
 def apply_rollback(connectConfig, script):
